@@ -1,18 +1,20 @@
-# dccc — Docker Container for Claude Code
+# dcba — Docker Container Built for Agents
 
-Sandboxed Docker environment for running [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+Sandboxed Docker environment for running CLI coding agents
 with network restrictions and host UID mapping.
+
+Supported agents: **Claude Code**, **Codex**, **Aider**, **Gemini CLI**, **Goose** — and easy to add more.
 
 ## Features
 
-- Runs Claude Code CLI inside an Ubuntu 24.04 container
+- Runs any CLI agent inside an Ubuntu 24.04 container
 - Maps host user UID/GID so file permissions stay correct
 - Firewall (iptables) limits outbound traffic to:
   - DNS
-  - `api.anthropic.com`
-  - `registry.npmjs.org`, `github.com`
+  - Agent-specific API hosts (e.g. `api.anthropic.com`)
+  - Shared domains (`registry.npmjs.org`, `github.com`, `pypi.org`, etc.)
   - Everything else is blocked
-- Mounts the workspace and `~/.claude` config from the host
+- Mounts the workspace and agent config from the host
 
 ## Quick Start
 
@@ -22,29 +24,44 @@ Build the image:
 ./build.sh
 ```
 
-Run Claude Code in any project directory:
+Run Claude Code (default agent):
 
 ```sh
 ./run.sh
 ```
 
-Pass extra arguments to `claude` CLI:
+Run a different agent:
 
 ```sh
-./run.sh claude --help
+./run.sh codex
+./run.sh aider
+./run.sh gemini
+./run.sh goose
 ```
 
 ## How It Works
 
-1. **build.sh** — builds a per-user Docker image (`dccc-$USER`) with the host UID/GID baked in
-2. **run.sh** — launches the container with:
-   - `--cap-add=NET_ADMIN` for firewall setup
-   - workspace and Claude config bind-mounted
+1. **build.sh** — builds a per-user Docker image (`dcba-$USER`) with the host UID/GID baked in
+2. **run.sh** — detects the agent from the first argument (or `$AGENT` env var, default `claude`), sources its profile from `agents/`, and launches the container with appropriate mounts and allowed hosts
 3. **entrypoint.sh** — initializes the firewall as root, then drops to the non-root user via `gosu`
-4. **init-firewall.sh** — sets up iptables rules to restrict outbound network access
+4. **init-firewall.sh** — sets up iptables rules from `$ALLOWED_HOSTS` to restrict outbound network access
 
-## Requirements
+## Adding a New Agent
 
-- Docker
-- Host user with UID/GID 1000 (default, configurable via build args)
-- Claude Code authentication (`~/.claude` / `~/.claude.json` on the host)
+Create `agents/<name>.sh` with three variables:
+
+```sh
+AGENT_CMD=(my-agent --flags)
+AGENT_MOUNTS=(
+    -v "$HOME/.my-agent:$HOME/.my-agent"
+)
+AGENT_HOSTS="api.example.com"
+```
+
+- `AGENT_CMD` — the command to run inside the container
+- `AGENT_MOUNTS` — Docker bind mounts for agent config
+- `AGENT_HOSTS` — space-separated API hosts to allow through the firewall
+
+Shared domains in `allowed_domains.txt` are automatically included for all agents.
+
+Then run: `./run.sh <name>`
