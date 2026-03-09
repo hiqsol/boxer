@@ -1,11 +1,14 @@
 #!/bin/bash
-# DNS (Docker embedded resolver only)
-iptables -A OUTPUT -d 127.0.0.11 -p udp --dport 53 -j ACCEPT
-iptables -A OUTPUT -d 127.0.0.11 -p tcp --dport 53 -j ACCEPT
+# DNS
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
 
 # Allowed hosts (from ALLOWED_HOSTS env var)
+# Resolve each host to all IPs so connections aren't blocked by DNS round-robin
 for host in $ALLOWED_HOSTS; do
-    iptables -A OUTPUT -d "$host" -j ACCEPT
+    for ip in $(getent ahostsv4 "$host" 2>/dev/null | awk '{print $1}' | sort -u); do
+        iptables -A OUTPUT -d "$ip" -j ACCEPT
+    done
 done
 
 # Block everything else
