@@ -1,5 +1,4 @@
 #!/bin/bash
-# Resolve workspace to absolute path
 WORKSPACE="$(cd "$(dirname "$0")" && pwd)"
 
 # Determine agent: first arg (if profile exists), $AGENT env var, or default "claude"
@@ -14,19 +13,12 @@ if [ ! -f "$PROFILE" ]; then
     echo "Unknown agent: $AGENT (no $PROFILE found)" >&2
     exit 1
 fi
-
-# Source agent profile
 source "$PROFILE"
 
-# Build allowed hosts: shared domains + agent-specific hosts
-ALLOWED_HOSTS="$AGENT_HOSTS"
-if [ -f "$WORKSPACE/allowed_domains.txt" ]; then
-    while IFS= read -r domain; do
-        [ -n "$domain" ] && ALLOWED_HOSTS="$ALLOWED_HOSTS $domain"
-    done < "$WORKSPACE/allowed_domains.txt"
-fi
+# Combine agent-specific hosts with shared domains
+ALLOWED_HOSTS="$AGENT_HOSTS $(grep -v '^#' "$WORKSPACE/allowed_domains.txt" | xargs)"
 
-# Command: extra args override agent default
+# Extra args override agent default command
 if [ $# -gt 0 ]; then
     CMD=("$@")
 else
@@ -39,7 +31,6 @@ docker run -it \
     -e ALLOWED_HOSTS="$ALLOWED_HOSTS" \
     -v "$WORKSPACE:$WORKSPACE" \
     -v "$HOME/.config/git:$HOME/.config/git" \
-    "${AGENT_ENV[@]}" \
     "${AGENT_MOUNTS[@]}" \
     -w "$WORKSPACE" \
     "dcba-$USER" "${CMD[@]}"

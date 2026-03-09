@@ -3,7 +3,7 @@
 Sandboxed Docker environment for running CLI coding agents
 with network restrictions and host UID mapping.
 
-Supported agents: **Claude Code**, **Codex**, **Aider**, **Gemini CLI**, **Goose** — and easy to add more.
+Supported agents: **Claude Code**, **Codex**, **Aider**, **Gemini CLI**, **OpenCode** — and easy to add more.
 
 ## Features
 
@@ -36,7 +36,7 @@ Run a different agent:
 ./run.sh codex
 ./run.sh aider
 ./run.sh gemini
-./run.sh goose
+./run.sh opencode
 ```
 
 ## How It Works
