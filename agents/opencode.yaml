@@ -1,0 +1,6 @@
+cmd: opencode --dangerously-skip-permissions
+hosts:
+  - api.anthropic.com
+  - api.openai.com
+mounts:
+  - ~/.config/opencode

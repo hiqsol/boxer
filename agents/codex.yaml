@@ -1,0 +1,5 @@
+cmd: codex --full-auto --approval-mode never
+hosts:
+  - api.openai.com
+mounts:
+  - ~/.codex

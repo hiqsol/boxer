@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""boxer — Docker sandbox for CLI coding agents."""
+
+import os
+import shlex
+import sys
+
+def image_name():
+    return f"boxer-{os.environ['USER']}"
+
+def parse_yaml(path):
+    """Parse simple YAML with scalar values and lists."""
+    data = {}
+    current_key = None
+    with open(path) as f:
+        for line in f:
+            line = line.rstrip('\n')
+            if not line or line.lstrip().startswith('#'):
+                continue
+            if line.startswith('  - '):
+                data.setdefault(current_key, []).append(line[4:])
+            elif ':' in line:
+                key, _, val = line.partition(':')
+                key = key.strip()
+                val = val.strip()
+                current_key = key
+                if val:
+                    data[key] = val
+    return data
+
+def build(boxerdir):
+    os.execvp("docker", [
+        "docker", "build",
+        "--build-arg", f"USERNAME={os.environ['USER']}",
+        "--build-arg", f"HOST_UID={os.getuid()}",
+        "--build-arg", f"HOST_GID={os.getgid()}",
+        "-t", image_name(), boxerdir,
+    ])
+
+def run(boxerdir, agent_name, extra_cmd):
+    home = os.environ["HOME"]
+    workspace = os.getcwd()
+
+    config_path = os.path.join(boxerdir, "agents", f"{agent_name}.yaml")
+    try:
+        config = parse_yaml(config_path)
+    except FileNotFoundError:
+        print(f"Unknown agent: {agent_name} (no {config_path} found)", file=sys.stderr)
+        sys.exit(1)
+
+    # Command
+    if extra_cmd:
+        cmd = extra_cmd
+    else:
+        cmd = shlex.split(config.get("cmd", agent_name))
+
+    # Mounts
+    mounts = []
+    for entry in config.get("mounts", []):
+        ro = entry.endswith(":ro")
+        path = entry[:-3] if ro else entry
+        path = os.path.expanduser(path)
+        mount = f"{path}:{path}:ro" if ro else f"{path}:{path}"
+        mounts.extend(["-v", mount])
+
+    # Hosts — combine agent hosts with shared domains
+    hosts = list(config.get("hosts", []))
+    domains_file = os.path.join(boxerdir, "allowed_domains.txt")
+    try:
+        with open(domains_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    hosts.append(line)
+    except FileNotFoundError:
+        pass
+
+    # Build docker args
+    args = [
+        "docker", "run", "-it",
+        "--cap-add=NET_ADMIN",
+        "-e", "TERM=xterm-256color",
+        "-e", f"ALLOWED_HOSTS={' '.join(hosts)}",
+        "-v", f"{workspace}:{workspace}",
+        "-v", f"{home}/.config/git:{home}/.config/git:ro",
+    ] + mounts + [
+        "-w", workspace,
+        image_name(),
+    ] + cmd
+
+    os.execvp("docker", args)
+
+def main():
+    boxerdir = os.path.dirname(os.path.realpath(__file__))
+    args = sys.argv[1:]
+
+    if args and args[0] == "build":
+        build(boxerdir)
+
+    # Parse: [agent] [-- extra_cmd...]
+    agent = "claude"
+    extra_cmd = []
+    if "--" in args:
+        idx = args.index("--")
+        if idx > 0:
+            agent = args[0]
+        extra_cmd = args[idx + 1:]
+    elif args:
+        agent = args[0]
+
+    run(boxerdir, agent, extra_cmd)
+
+if __name__ == "__main__":
+    main()

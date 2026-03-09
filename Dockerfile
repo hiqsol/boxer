@@ -18,6 +18,6 @@ RUN userdel -r "$(id -nu "$HOST_UID" 2>/dev/null)" 2>/dev/null; \
 
 ENV PATH="/home/$USERNAME/.local/bin:$PATH"
 
-COPY --chmod=755 init-firewall.sh entrypoint.sh /usr/local/bin/
+COPY --chmod=755 docker/init-firewall.sh docker/entrypoint.sh /usr/local/bin/
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

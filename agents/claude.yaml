@@ -1,0 +1,8 @@
+cmd: claude --dangerously-skip-permissions
+hosts:
+  - api.anthropic.com
+mounts:
+  - ~/.local/bin/claude:ro
+  - ~/.local/share/claude
+  - ~/.claude
+  - ~/.claude.json

@@ -1,0 +1,5 @@
+cmd: gemini --sandbox none
+hosts:
+  - generativelanguage.googleapis.com
+mounts:
+  - ~/.config/gemini

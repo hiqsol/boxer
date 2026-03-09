@@ -1,0 +1,6 @@
+cmd: aider --yes-always --no-suggest-shell-commands
+hosts:
+  - api.anthropic.com
+  - api.openai.com
+mounts:
+  - ~/.aider.conf.yml:ro

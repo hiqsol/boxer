@@ -21,47 +21,53 @@ Supported agents: **Claude Code**, **Codex**, **Aider**, **Gemini CLI**, **OpenC
 Build the image:
 
 ```sh
-./build.sh
+./box build
 ```
 
 Run Claude Code (default agent):
 
 ```sh
-./run.sh
+./box
 ```
 
 Run a different agent:
 
 ```sh
-./run.sh codex
-./run.sh aider
-./run.sh gemini
-./run.sh opencode
+./box codex
+./box aider
+./box gemini
+./box opencode
+```
+
+Override the command (e.g. open a shell with agent config mounted):
+
+```sh
+./box claude -- bash
 ```
 
 ## How It Works
 
-1. **build.sh** — builds a per-user Docker image (`boxer-$USER`) with the host UID/GID baked in
-2. **run.sh** — detects the agent from the first argument (or `$AGENT` env var, default `claude`), sources its profile from `agents/`, and launches the container with appropriate mounts and allowed hosts
-3. **entrypoint.sh** — initializes the firewall as root, then drops to the non-root user via `gosu`
-4. **init-firewall.sh** — sets up iptables rules from `$ALLOWED_HOSTS` to restrict outbound network access
+1. **box** — Python CLI that reads agent configs from `agents/*.yaml`, builds docker arguments (mounts, allowed hosts, command), and launches the container
+2. **docker/entrypoint.sh** — initializes the firewall as root, then drops to the non-root user via `gosu`
+3. **docker/init-firewall.sh** — sets up iptables rules from `$ALLOWED_HOSTS` to restrict outbound network access
 
 ## Adding a New Agent
 
-Create `agents/<name>.sh` with three variables:
+Create `agents/<name>.yaml`:
 
-```sh
-AGENT_CMD=(my-agent --flags)
-AGENT_MOUNTS=(
-    -v "$HOME/.my-agent:$HOME/.my-agent"
-)
-AGENT_HOSTS="api.example.com"
+```yaml
+cmd: my-agent --flags
+hosts:
+  - api.example.com
+mounts:
+  - ~/.config/my-agent
+  - ~/.my-agent-rc:ro
 ```
 
-- `AGENT_CMD` — the command to run inside the container
-- `AGENT_MOUNTS` — Docker bind mounts for agent config
-- `AGENT_HOSTS` — space-separated API hosts to allow through the firewall
+- `cmd` — the command to run inside the container
+- `hosts` — API hosts to allow through the firewall
+- `mounts` — bind mounts from host; paths starting with `~/` expand to `$HOME`, append `:ro` for read-only
 
 Shared domains in `allowed_domains.txt` are automatically included for all agents.
 
-Then run: `./run.sh <name>`
+Then run: `./box <name>`
