@@ -30,7 +30,7 @@ docker run -it \
     -e TERM=xterm-256color \
     -e ALLOWED_HOSTS="$ALLOWED_HOSTS" \
     -v "$WORKSPACE:$WORKSPACE" \
-    -v "$HOME/.config/git:$HOME/.config/git" \
+    -v "$HOME/.config/git:$HOME/.config/git:ro" \
     "${AGENT_MOUNTS[@]}" \
     -w "$WORKSPACE" \
     "dcba-$USER" "${CMD[@]}"
