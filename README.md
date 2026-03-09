@@ -21,33 +21,33 @@ Supported agents: **Claude Code**, **Codex**, **Aider**, **Gemini CLI**, **OpenC
 Build the image:
 
 ```sh
-./box build
+./boxer build
 ```
 
 Run Claude Code (default agent):
 
 ```sh
-./box
+./boxer
 ```
 
 Run a different agent:
 
 ```sh
-./box codex
-./box aider
-./box gemini
-./box opencode
+./boxer codex
+./boxer aider
+./boxer gemini
+./boxer opencode
 ```
 
 Override the command (e.g. open a shell with agent config mounted):
 
 ```sh
-./box claude -- bash
+./boxer claude -- bash
 ```
 
 ## How It Works
 
-1. **box** — Python CLI that reads agent configs from `agents/*.yaml`, builds docker arguments (mounts, allowed hosts, command), and launches the container
+1. **boxer** — Python CLI that reads agent configs from `agents/*.yaml`, builds docker arguments (mounts, allowed hosts, command), and launches the container
 2. **docker/entrypoint.sh** — initializes the firewall as root, then drops to the non-root user via `gosu`
 3. **docker/init-firewall.sh** — sets up iptables rules from `$ALLOWED_HOSTS` to restrict outbound network access
 
@@ -70,4 +70,4 @@ mounts:
 
 Shared domains in `allowed_domains.txt` are automatically included for all agents.
 
-Then run: `./box <name>`
+Then run: `./boxer <name>`
