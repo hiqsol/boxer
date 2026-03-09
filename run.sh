@@ -33,4 +33,4 @@ docker run -it \
     -v "$HOME/.config/git:$HOME/.config/git:ro" \
     "${AGENT_MOUNTS[@]}" \
     -w "$WORKSPACE" \
-    "dcba-$USER" "${CMD[@]}"
+    "boxer-$USER" "${CMD[@]}"

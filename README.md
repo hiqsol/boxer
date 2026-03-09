@@ -1,4 +1,4 @@
-# dcba — Docker Container Built for Agents
+# boxer — Docker sandbox for CLI coding agents
 
 Sandboxed Docker environment for running CLI coding agents
 with network restrictions and host UID mapping.
@@ -41,7 +41,7 @@ Run a different agent:
 
 ## How It Works
 
-1. **build.sh** — builds a per-user Docker image (`dcba-$USER`) with the host UID/GID baked in
+1. **build.sh** — builds a per-user Docker image (`boxer-$USER`) with the host UID/GID baked in
 2. **run.sh** — detects the agent from the first argument (or `$AGENT` env var, default `claude`), sources its profile from `agents/`, and launches the container with appropriate mounts and allowed hosts
 3. **entrypoint.sh** — initializes the firewall as root, then drops to the non-root user via `gosu`
 4. **init-firewall.sh** — sets up iptables rules from `$ALLOWED_HOSTS` to restrict outbound network access
