@@ -2,3 +2,16 @@ registry.npmjs.org
 github.com
 pypi.org
 files.pythonhosted.org
+bootstrap.pypa.io
+archive.ubuntu.com
+security.ubuntu.com
+objects.githubusercontent.com
+raw.githubusercontent.com
+github-releases.githubusercontent.com
+nodejs.org
+yarnpkg.com
+registry.yarnpkg.com
+proxy.golang.org
+sum.golang.org
+dl.google.com
+deb.nodesource.com
