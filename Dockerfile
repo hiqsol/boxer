@@ -6,7 +6,7 @@ ARG HOST_GID=1000
 
 RUN apt-get update && apt-get install -y \
     bash curl git build-essential \
-    python3 nodejs npm fish neovim \
+    python3 python3-pip nodejs npm fish neovim \
     iptables iproute2 gosu \
     && rm -rf /var/lib/apt/lists/*
 
