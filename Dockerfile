@@ -1,14 +1,18 @@
 FROM ubuntu:24.04
 
-ARG USERNAME=sol
-ARG HOST_UID=1000
-ARG HOST_GID=1000
+ARG USERNAME=$(whoami)
+ARG HOST_UID=$(id -u)
+ARG HOST_GID=$(id -g)
+
+RUN echo $USERNAME
 
 RUN apt-get update && apt-get install -y \
     bash curl git build-essential \
     python3 python3-pip nodejs npm fish neovim git-lfs \
     iptables iproute2 gosu \
     && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get autoremove --purge -y
 
 # Create user with host UID/GID (remove conflicting ubuntu user/group if present)
 RUN userdel -r "$(id -nu "$HOST_UID" 2>/dev/null)" 2>/dev/null; \
@@ -18,6 +22,7 @@ RUN userdel -r "$(id -nu "$HOST_UID" 2>/dev/null)" 2>/dev/null; \
 
 ENV PATH="/home/$USERNAME/.local/bin:$PATH"
 
-COPY --chmod=755 docker/init-firewall.sh docker/entrypoint.sh /usr/local/bin/
+COPY docker/init-firewall.sh docker/entrypoint.sh /usr/local/bin/
+RUN chmod 755 /usr/local/bin/init-firewall.sh /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

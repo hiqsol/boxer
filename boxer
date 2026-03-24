@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """boxer — Docker sandbox for CLI coding agents."""
 
+import getpass
 import os
 import shlex
 import sys
 
 def image_name():
-    return f"boxer-{os.environ['USER']}"
+    return f"boxer-{getpass.getuser()}:latest"
 
 def parse_yaml(path):
     """Parse simple YAML with scalar values and lists."""
