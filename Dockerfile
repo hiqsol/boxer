@@ -10,9 +10,8 @@ RUN apt-get update && apt-get install -y \
     bash curl git build-essential \
     python3 python3-pip nodejs npm fish neovim git-lfs \
     iptables iproute2 gosu \
+    && apt-get autoremove --purge -y \
     && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get autoremove --purge -y
 
 # Create user with host UID/GID (remove conflicting ubuntu user/group if present)
 RUN userdel -r "$(id -nu "$HOST_UID" 2>/dev/null)" 2>/dev/null; \
