@@ -1,10 +1,8 @@
 FROM ubuntu:24.04
 
-ARG USERNAME=$(whoami)
-ARG HOST_UID=$(id -u)
-ARG HOST_GID=$(id -g)
-
-RUN echo $USERNAME
+ARG USERNAME
+ARG HOST_UID
+ARG HOST_GID
 
 RUN apt-get update && apt-get install -y \
     bash curl git build-essential \
