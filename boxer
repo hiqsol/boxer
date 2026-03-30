@@ -38,7 +38,7 @@ def build(boxerdir):
         "-t", image_name(), boxerdir,
     ])
 
-def run(boxerdir, agent_name, extra_cmd):
+def run(boxerdir, agent_name, extra_args, override_cmd=None):
     home = os.environ["HOME"]
     workspace = os.getcwd()
 
@@ -50,10 +50,10 @@ def run(boxerdir, agent_name, extra_cmd):
         sys.exit(1)
 
     # Command
-    if extra_cmd:
-        cmd = extra_cmd
+    if override_cmd:
+        cmd = [override_cmd]
     else:
-        cmd = shlex.split(config.get("cmd", agent_name))
+        cmd = shlex.split(config.get("cmd", agent_name)) + extra_args
 
     # Mounts
     mounts = []
@@ -98,18 +98,18 @@ def main():
     if args and args[0] == "build":
         build(boxerdir)
 
-    # Parse: [agent] [-- extra_cmd...]
+    # Parse: [agent] [args...] OR bash [agent]
     agent = "claude"
-    extra_cmd = []
-    if "--" in args:
-        idx = args.index("--")
-        if idx > 0:
-            agent = args[0]
-        extra_cmd = args[idx + 1:]
+    extra_args = []
+    override_cmd = None
+    if args and args[0] == "bash":
+        override_cmd = "bash"
+        agent = args[1] if len(args) > 1 else "claude"
     elif args:
         agent = args[0]
+        extra_args = args[1:]
 
-    run(boxerdir, agent, extra_cmd)
+    run(boxerdir, agent, extra_args, override_cmd)
 
 if __name__ == "__main__":
     main()
