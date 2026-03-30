@@ -7,9 +7,15 @@ ARG HOST_GID=$(id -g)
 RUN echo $USERNAME
 
 RUN apt-get update && apt-get install -y \
-    bash curl git build-essential \
+    bash curl wget git build-essential \
     python3 python3-pip nodejs npm fish neovim git-lfs \
-    iptables iproute2 gosu \
+    sudo iputils-ping iptables iproute2 gosu \
+    openssh-client ca-certificates gnupg \
+    jq yq zip unzip tar gzip \
+    htop less tree tmux \
+    net-tools dnsutils strace lsof \
+    ripgrep fd-find fzf bat \
+    man-db file \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get autoremove --purge -y
