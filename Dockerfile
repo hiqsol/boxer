@@ -13,10 +13,13 @@ RUN apt-get update && apt-get install -y \
     htop less tree tmux \
     net-tools dnsutils strace lsof \
     ripgrep fd-find fzf bat \
-    man-db file \
-    iptables iproute2 gosu \
-    && apt-get autoremove --purge -y \
-    && rm -rf /var/lib/apt/lists/*
+    man-db file
+
+RUN apt-get autoremove --purge -y
+
+RUN apt-get clean
+
+RUN rm -rf /var/lib/apt/lists/*
 
 # Create user with host UID/GID (remove conflicting ubuntu user/group if present)
 RUN userdel -r "$(id -nu "$HOST_UID" 2>/dev/null)" 2>/dev/null; \
