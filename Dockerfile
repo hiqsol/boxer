@@ -4,7 +4,7 @@ ARG USERNAME
 ARG HOST_UID
 ARG HOST_GID
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     bash curl wget git build-essential \
     python3 python3-pip nodejs npm fish neovim git-lfs \
     sudo iputils-ping iptables iproute2 gosu \
@@ -13,13 +13,15 @@ RUN apt-get update && apt-get install -y \
     htop less tree tmux \
     net-tools dnsutils strace lsof \
     ripgrep fd-find fzf bat \
-    man-db file
-
-RUN apt-get autoremove --purge -y
-
-RUN apt-get clean
-
-RUN rm -rf /var/lib/apt/lists/*
+    man-db file \
+    software-properties-common \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    python3.10 python3.10-venv python3.10-distutils \
+    && python3.10 -m ensurepip --upgrade \
+    && apt-get autoremove --purge -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create user with host UID/GID (remove conflicting ubuntu user/group if present)
 RUN userdel -r "$(id -nu "$HOST_UID" 2>/dev/null)" 2>/dev/null; \
